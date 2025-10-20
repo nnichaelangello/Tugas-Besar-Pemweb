@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stok - Warung Bakso</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <nav class="bg-blue-600 text-white p-4">
+    <div class="container mx-auto flex justify-between items-center">
+      <h1 class="text-lg font-bold">Warung Bakso - Admin</h1>
+      <input type="checkbox" id="menu-toggle" class="hidden">
+      <label for="menu-toggle" class="md:hidden cursor-pointer">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+        </svg>
+      </label>
+      <div id="navbar-menu" class="hidden md:flex md:space-x-4 flex-col md:flex-row">
+        <a href="dashboard.html" class="px-4 py-2 rounded hover:bg-blue-700">Dasbor</a>
+        <a href="transaksi.html" class="px-4 py-2 rounded hover:bg-blue-700">Transaksi</a>
+        <a href="produk.html" class="px-4 py-2 rounded hover:bg-blue-700">Produk</a>
+        <a href="pengguna.html" class="px-4 py-2 rounded hover:bg-blue-700">Pengguna</a>
+        <a href="stok.html" class="px-4 py-2 rounded hover:bg-blue-700">Stok</a>
+        <a href="laporan.html" class="px-4 py-2 rounded hover:bg-blue-700">Laporan</a>
+        <a href="pengaturan.html" class="px-4 py-2 rounded hover:bg-blue-700">Pengaturan</a>
+        <button onclick="logout()" class="bg-red-500 px-4 py-2 rounded hover:bg-red-600">Keluar</button>
+      </div>
+    </div>
+  </nav>
+  <div class="container mx-auto p-4">
+    <h2 class="text-2xl font-bold mb-4">Manajemen Stok</h2>
+    <div class="bg-white p-4 rounded-lg shadow mb-4">
+      <h3 class="font-semibold mb-2">Penyesuaian Stok</h3>
+      <select id="stock-product" class="p-2 border rounded w-full mb-2" aria-label="Pilih produk">
+        <option value="">Pilih Produk</option>
+      </select>
+      <input type="number" id="stock-quantity" class="p-2 border rounded w-full mb-2" placeholder="Jumlah (contoh: 10)" aria-label="Jumlah stok">
+      <input type="text" id="stock-reason" class="p-2 border rounded w-full mb-2" placeholder="Alasan (contoh: Restock)" aria-label="Alasan penyesuaian">
+      <button onclick="adjustStock()" class="bg-blue-500 text-white p-2 rounded">Sesuaikan Stok</button>
+    </div>
+    <div class="bg-white p-4 rounded-lg shadow">
+      <h3 class="font-semibold mb-2">Riwayat Stok</h3>
+      <button onclick="exportStockHistory()" class="bg-green-500 text-white p-2 rounded mb-4">Ekspor Riwayat CSV</button>
+      <table>
+        <thead>
+          <tr class="bg-gray-200">
+            <th>Waktu</th>
+            <th>Produk</th>
+            <th>Jumlah</th>
+            <th>Alasan</th>
+          </tr>
+        </thead>
+        <tbody id="stock-history"></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="toast"></div>
+  <script src="../assets/js/data.js"></script>
+  <script src="../assets/js/utils.js"></script>
+  <script src="js/stok.js"></script>
+</body>
+</html>

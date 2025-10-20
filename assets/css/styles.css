@@ -1,0 +1,76 @@
+/* Custom styles untuk Tailwind */
+body {
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .navbar-active {
+    background-color: #2563eb;
+    color: white;
+    font-weight: bold;
+    border-radius: 0.375rem;
+  }
+  
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  th, td {
+    border: 1px solid #e5e7eb;
+    padding: 12px;
+    text-align: left;
+  }
+  
+  button:hover {
+    opacity: 0.9;
+  }
+  
+  /* Toast Notification */
+  #toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #10b981;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 0.375rem;
+    display: none;
+    z-index: 1000;
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  /* Hamburger menu */
+  #menu-toggle {
+    display: none;
+  }
+  
+  @media (max-width: 768px) {
+    #menu-toggle:checked ~ #navbar-menu {
+      display: flex;
+      flex-direction: column;
+      position: absolute;
+      top: 64px;
+      left: 0;
+      right: 0;
+      background-color: #2563eb;
+      padding: 16px;
+    }
+    #navbar-menu {
+      display: none;
+    }
+  }
+  
+  /* Input harga */
+  input[type="number"].formatted {
+    text-align: right;
+  }
+  
+  /* Animasi transisi */
+  .container {
+    animation: fadeIn 0.3s ease-in;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
