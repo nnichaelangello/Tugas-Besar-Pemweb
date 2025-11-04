@@ -3,14 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Produk - Warung Bakso</title>
+  <title>Manajemen Produk - Warung Bakso</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
   <nav class="bg-blue-600 text-white p-4">
     <div class="container mx-auto flex justify-between items-center">
-      <h1 class="text-lg font-bold">Warung Bakso - Admin</h1>
+      <h1 class="text-xl font-bold flex items-center gap-2">
+        <span>Warung Bakso</span>
+        <span class="hidden sm:inline text-sm font-normal">| Produk Admin</span>
+      </h1>
       <input type="checkbox" id="menu-toggle" class="hidden">
       <label for="menu-toggle" class="md:hidden cursor-pointer">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,50 +33,127 @@
       </div>
     </div>
   </nav>
+
   <div class="container mx-auto p-4">
-    <h2 class="text-2xl font-bold mb-4">Manajemen Produk</h2>
-    <div class="bg-white p-4 rounded-lg shadow mb-4">
-      <input type="text" id="product-name" class="p-2 border rounded w-full mb-2" placeholder="Nama produk" aria-label="Nama produk">
-      <input type="text" id="product-price" class="p-2 border rounded w-full mb-2 formatted" placeholder="Harga" aria-label="Harga produk">
-      <input type="text" id="product-code" class="p-2 border rounded w-full mb-2" placeholder="Kode produk" aria-label="Kode produk">
-      <input type="number" id="product-stock" class="p-2 border rounded w-full mb-2" placeholder="Stok" aria-label="Stok produk">
-      <select id="product-category" class="p-2 border rounded w-full mb-2" aria-label="Kategori produk">
-        <option value="Makanan">Makanan</option>
-        <option value="Minuman">Minuman</option>
-      </select>
-      <button onclick="addProduct()" class="bg-blue-500 text-white p-2 rounded">Tambah Produk</button>
-    </div>
-    <div class="bg-white p-4 rounded-lg shadow mb-4">
-      <div class="flex space-x-4 mb-4">
-        <select id="filter-category" class="p-2 border rounded" aria-label="Filter kategori">
-          <option value="">Semua Kategori</option>
-          <option value="Makanan">Makanan</option>
-          <option value="Minuman">Minuman</option>
-        </select>
-        <select id="sort-by" class="p-2 border rounded" aria-label="Urutkan berdasarkan">
-          <option value="name">Nama</option>
-          <option value="price">Harga</option>
-          <option value="stock">Stok</option>
-        </select>
+    <h2 class="text-2xl font-bold mb-6">Manajemen Produk Lengkap</h2>
+
+    <!-- FORM TAMBAH/EDIT PRODUK -->
+    <div class="bg-white p-5 rounded-lg shadow mb-6">
+      <h3 class="text-lg font-semibold mb-4" id="form-title">Tambah Produk Baru</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Kode Produk</label>
+          <input type="text" id="product-code" class="w-full p-2 border rounded" placeholder="BK001" maxlength="10">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Nama Produk</label>
+          <input type="text" id="product-name" class="w-full p-2 border rounded" placeholder="Bakso Sapi">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Harga (Rp)</label>
+          <input type="text" id="product-price" class="w-full p-2 border rounded formatted" placeholder="15.000">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Stok Awal</label>
+          <input type="number" id="product-stock" class="w-full p-2 border rounded" placeholder="50" min="0">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Kategori</label>
+          <select id="product-category" class="w-full p-2 border rounded">
+            <option value="">Pilih Kategori</option>
+            <option value="Makanan">Makanan</option>
+            <option value="Minuman">Minuman</option>
+            <option value="Tambahan">Tambahan</option>
+            <option value="Paket">Paket</option>
+          </select>
+        </div>
+        <div class="flex items-end gap-2">
+          <button id="save-btn" onclick="saveProduct()" class="bg-blue-600 text-white w-full px-4 py-2 rounded hover:bg-blue-700">Simpan</button>
+          <button onclick="cancelEdit()" class="bg-gray-500 text-white w-full px-4 py-2 rounded hover:bg-gray-600 hidden" id="cancel-btn">Batal</button>
+        </div>
       </div>
-      <table>
-        <thead>
-          <tr class="bg-gray-200">
-            <th>Kode</th>
-            <th>Nama</th>
-            <th>Harga</th>
-            <th>Stok</th>
-            <th>Kategori</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="product-table"></tbody>
-      </table>
     </div>
-  </div>
+
+    <!-- FILTER & KONTROL -->
+    <div class="bg-white p-5 rounded-lg shadow mb-6">
+      <div class="flex flex-col md:flex-row justify-between gap-4 mb-4">
+        <div class="flex gap-2">
+          <select id="filter-category" class="p-2 border rounded">
+            <option value="">Semua Kategori</option>
+            <option value="Makanan">Makanan</option>
+            <option value="Minuman">Minuman</option>
+            <option value="Tambahan">Tambahan</option>
+            <option value="Paket">Paket</option>
+          </select>
+          <select id="filter-stock" class="p-2 border rounded">
+            <option value="">Semua Stok</option>
+            <option value="low">Stok Rendah (&lt;10)</option>
+            <option value="medium">Stok Sedang (10-30)</option>
+            <option value="high">Stok Aman (&gt;30)</option>
+          </select>
+          <input type="text" id="search-name" class="p-2 border rounded" placeholder="Cari nama...">
+        </div>
+        <div class="flex gap-2">
+          <select id="sort-by" class="p-2 border rounded">
+            <option value="name-asc">Nama (A-Z)</option>
+            <option value="name-desc">Nama (Z-A)</option>
+            <option value="price-asc">Harga (Rendah)</option>
+            <option value="price-desc">Harga (Tinggi)</option>
+            <option value="stock-asc">Stok (Rendah)</option>
+            <option value="stock-desc">Stok (Tinggi)</option>
+          </select>
+          <button onclick="exportProductsCSV()" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">CSV</button>
+          <button onclick="exportProductsPDF()" class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">PDF</button>
+        </div>
+      </div>
+      <button onclick="applyFilters()" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">Terapkan Filter</button>
+    </div>
+
+    <!-- DAFTAR PRODUK -->
+    <div class="bg-white p-5 rounded-lg shadow mb-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold">Daftar Produk</h3>
+        <p class="text-sm text-gray-600">Total: <span id="total-products">0</span> produk</p>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="bg-gray-100">
+              <th class="p-3">Kode</th>
+              <th class="p-3">Nama</th>
+              <th class="p-3">Harga</th>
+              <th class="p-3 text-center">Stok</th>
+              <th class="p-3">Kategori</th>
+              <th class="p-3 text-center">Status</th>
+              <th class="p-3 text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="product-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- GRAFIK PRODUK -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white p-5 rounded-lg shadow">
+        <h3 class="text-lg font-semibold mb-4">Distribusi Kategori</h3>
+        <div class="h-64"> <!-- Wrapper dengan tinggi tetap -->
+          <canvas id="category-chart"></canvas>
+        </div>
+      </div>
+      <div class="bg-white p-5 rounded-lg shadow">
+        <h3 class="text-lg font-semibold mb-4">Stok per Kategori</h3>
+        <div class="h-64">
+          <canvas id="stock-chart"></canvas>
+        </div>
+      </div>
+    </div>
+
   <div id="toast"></div>
+
   <script src="../assets/js/data.js"></script>
   <script src="../assets/js/utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="js/produk.js"></script>
 </body>
 </html>

@@ -3,33 +3,116 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Sistem Kasir Warung Bakso</title>
+  <title>Login - Warung Bakso</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Poppins', sans-serif; }
+    body { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%); overflow: hidden; }
+    .glass { backdrop-filter: blur(12px); background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.2); }
+    .input-glow:focus { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+    .btn-glow { background: linear-gradient(45deg, #3b82f6, #60a5fa); box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4); }
+    .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(59, 130, 246, 0.6); }
+  </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center h-screen">
-  <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-    <h1 class="text-2xl font-bold text-center mb-6">Login Warung Bakso</h1>
-    <div class="space-y-4">
-      <div>
-        <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-        <input type="text" id="username" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500" placeholder="Masukkan username" aria-required="true">
-      </div>
-      <div>
-        <label for="password" class="block text-sm font-medium text-gray-700">Kata Sandi</label>
-        <input type="password" id="password" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500" placeholder="Masukkan kata sandi" aria-required="true">
-      </div>
-      <button onclick="handleLogin()" class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Login</button>
-    </div>
-    <p id="error-message" class="text-red-500 text-sm mt-4 hidden">Username atau kata sandi salah!</p>
+<body class="flex items-center justify-center min-h-screen relative">
+
+  <!-- BACKGROUND ANIMASI -->
+  <div class="absolute inset-0 overflow-hidden">
+    <div class="absolute -top-40 -left-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+    <div class="absolute -top-20 -right-20 w-80 h-80 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+    <div class="absolute -bottom-40 left-60 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
   </div>
+
+  <!-- LOGIN CARD -->
+  <div id="login-card" class="glass p-8 rounded-2xl shadow-2xl w-full max-w-md z-10 transform transition-all duration-1000 scale-100">
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-4 animate-pulse">
+        <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h-4m-6 0H5a2 2 0 002-2v-1"></path>
+        </svg>
+      </div>
+      <h1 class="text-3xl font-bold text-white">Warung Bakso Pak Farrel</h1>
+      <p class="text-blue-200 mt-1">Sistem Kasir</p>
+    </div>
+
+    <div class="space-y-5">
+      <div>
+        <label class="block text-sm font-medium text-blue-100 mb-2">Username</label>
+        <input type="text" id="username" class="w-full p-3 bg-white bg-opacity-20 border border-white border-opacity-30 rounded-xl text-white placeholder-blue-200 input-glow focus:outline-none" placeholder="Masukkan username">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-blue-100 mb-2">Kata Sandi</label>
+        <input type="password" id="password" class="w-full p-3 bg-white bg-opacity-20 border border-white border-opacity-30 rounded-xl text-white placeholder-blue-200 input-glow focus:outline-none" placeholder="••••••••">
+      </div>
+      <button onclick="handleLogin()" class="w-full py-4 mt-6 btn-glow text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105">
+        <span id="login-text">Masuk ke Sistem</span>
+        <span id="login-spinner" class="hidden">Memproses...</span>
+      </button>
+    </div>
+    <p id="error-message" class="text-red-300 text-sm mt-4 text-center hidden"></p>
+  </div>
+
+  <!-- PRELOADER ANIMASI -->
+  <div id="preloader" class="fixed inset-0 bg-gradient-to-br from-blue-900 via-blue-600 to-purple-700 flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-1000">
+    <div class="relative">
+      <!-- ORB ANIMASI -->
+      <div class="w-32 h-32 bg-gradient-to-br from-yellow-400 to-orange-600 rounded-full animate-ping absolute opacity-75"></div>
+      <div class="w-32 h-32 bg-gradient-to-br from-blue-400 to-purple-600 rounded-full animate-pulse"></div>
+      
+      <!-- TEXT ANIMASI -->
+      <div class="absolute inset-0 flex items-center justify-center">
+        <div class="text-center">
+          <h1 id="welcome-text" class="text-5xl font-bold text-white opacity-0 transform translate-y-4 transition-all duration-1000">SELAMAT DATANG</h1>
+          <p id="user-role" class="text-xl text-yellow-300 mt-2 opacity-0 transform translate-y-4 transition-all duration-1000 delay-500"></p>
+        </div>
+      </div>
+
+      <!-- PARTICLE EFFECT -->
+      <div class="absolute inset-0 flex items-center justify-center">
+        <div class="particle"></div>
+        <div class="particle delay-200"></div>
+        <div class="particle delay-400"></div>
+        <div class="particle delay-600"></div>
+        <div class="particle delay-800"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
   <script src="assets/js/data.js"></script>
   <script src="assets/js/utils.js"></script>
   <script>
+    // ANIMASI BLOB BACKGROUND
+    const blobs = document.querySelectorAll('.animate-blob');
+    blobs.forEach(blob => {
+      blob.style.animation = `blob 7s infinite`;
+      blob.style.animationDelay = `${Math.random() * 5}s`;
+    });
+
+    // PARTIKEL
+    const particles = document.querySelectorAll('.particle');
+    particles.forEach(p => {
+      p.style.cssText = `
+        position: absolute;
+        width: 4px; height: 4px;
+        background: white;
+        border-radius: 50%;
+        animation: float 3s infinite ease-in-out;
+        animation-delay: ${p.classList.contains('delay-200') ? '0.2s' : p.classList.contains('delay-400') ? '0.4s' : p.classList.contains('delay-600') ? '0.6s' : p.classList.contains('delay-800') ? '0.8s' : '0s'};
+        left: ${Math.random() * 100}%;
+        top: ${Math.random() * 100}%;
+      `;
+    });
+
     function handleLogin() {
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
       const errorMessage = document.getElementById('error-message');
+      const loginText = document.getElementById('login-text');
+      const loginSpinner = document.getElementById('login-spinner');
 
       if (!username || !password) {
         errorMessage.textContent = 'Isi semua kolom!';
@@ -39,16 +122,57 @@
 
       const users = getUsers();
       const user = users.find(u => u.username === username && u.password === password);
-
-      if (user) {
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        addActivityLog({ activity: `Login: ${username} (${user.role})` });
-        window.location.href = user.role === 'admin' ? 'admin/dashboard.html' : 'kasir.html';
-      } else {
+      if (!user) {
         errorMessage.textContent = 'Username atau kata sandi salah!';
         errorMessage.classList.remove('hidden');
+        return;
       }
+
+      // MULAI PRELOADER
+      loginText.classList.add('hidden');
+      loginSpinner.classList.remove('hidden');
+      document.getElementById('login-card').style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        document.getElementById('preloader').classList.remove('opacity-0', 'pointer-events-none');
+        document.getElementById('preloader').classList.add('opacity-100');
+        document.getElementById('login-card').style.opacity = '0';
+
+        // ANIMASI TEXT
+        setTimeout(() => {
+          document.getElementById('welcome-text').classList.remove('opacity-0', 'translate-y-4');
+          document.getElementById('welcome-text').classList.add('opacity-100', 'translate-y-0');
+        }, 300);
+
+        setTimeout(() => {
+          const roleText = user.role === 'admin' ? 'ADMIN' : 'KASIR';
+          document.getElementById('user-role').textContent = roleText;
+          document.getElementById('user-role').classList.remove('opacity-0', 'translate-y-4');
+          document.getElementById('user-role').classList.add('opacity-100', 'translate-y-0');
+        }, 800);
+
+        // SIMPAN USER & LOG
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        addActivityLog({ activity: `Login: ${username} (${user.role})` });
+
+        // MASUK KE DASHBOARD
+        setTimeout(() => {
+          const target = user.role === 'admin' ? 'admin/dashboard.html' : 'kasir.html';
+          window.location.href = target;
+        }, 2800);
+
+      }, 600);
     }
   </script>
+
+  <style>
+    @keyframes blob {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      50% { transform: translate(30px, -30px) rotate(180deg); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) translateX(0); }
+      50% { transform: translateY(-20px) translateX(10px); }
+    }
+  </style>
 </body>
 </html>

@@ -3,14 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Laporan - Warung Bakso</title>
+  <title>Laporan Penjualan - Warung Bakso</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
   <nav class="bg-blue-600 text-white p-4">
     <div class="container mx-auto flex justify-between items-center">
-      <h1 class="text-lg font-bold">Warung Bakso - Admin</h1>
+      <h1 class="text-xl font-bold flex items-center gap-2">
+        <span>Warung Bakso</span>
+        <span class="hidden sm:inline text-sm font-normal">| Laporan Admin</span>
+      </h1>
       <input type="checkbox" id="menu-toggle" class="hidden">
       <label for="menu-toggle" class="md:hidden cursor-pointer">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,28 +33,91 @@
       </div>
     </div>
   </nav>
+
   <div class="container mx-auto p-4">
-    <h2 class="text-2xl font-bold mb-4">Laporan Penjualan</h2>
-    <div class="bg-white p-4 rounded-lg shadow mb-4">
-      <select id="report-type" class="p-2 border rounded mr-2" aria-label="Tipe laporan">
-        <option value="daily">Harian</option>
-        <option value="weekly">Mingguan</option>
-        <option value="monthly">Bulanan</option>
-        <option value="yearly">Tahunan</option>
-      </select>
-      <button onclick="generateReport()" class="bg-blue-500 text-white p-2 rounded">Buat Laporan</button>
-      <button onclick="exportReport()" class="bg-green-500 text-white p-2 rounded">Ekspor CSV</button>
+    <h2 class="text-2xl font-bold mb-6">Laporan Penjualan Lengkap</h2>
+
+    <!-- FILTER & KONTROL -->
+    <div class="bg-white p-5 rounded-lg shadow mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Tipe Laporan</label>
+          <select id="report-type" class="w-full p-2 border rounded">
+            <option value="daily">Harian</option>
+            <option value="weekly">Mingguan</option>
+            <option value="monthly">Bulanan</option>
+            <option value="yearly">Tahunan</option>
+            <option value="custom">Rentang Tanggal</option>
+          </select>
+        </div>
+
+        <div id="custom-range" class="hidden">
+          <label class="block text-sm font-medium mb-1">Dari - Sampai</label>
+          <div class="flex gap-2">
+            <input type="date" id="date-start" class="p-2 border rounded flex-1">
+            <input type="date" id="date-end" class="p-2 border rounded flex-1">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Urutkan</label>
+          <select id="sort-by" class="w-full p-2 border rounded">
+            <option value="date-desc">Tanggal (Terbaru)</option>
+            <option value="date-asc">Tanggal (Terlama)</option>
+            <option value="total-desc">Total (Terbesar)</option>
+            <option value="total-asc">Total (Terkecil)</option>
+          </select>
+        </div>
+
+        <div class="flex items-end gap-2">
+          <button onclick="generateReport()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex-1">Buat Laporan</button>
+          <button onclick="exportCSV()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">CSV</button>
+          <button onclick="exportPDF()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">PDF</button>
+        </div>
+      </div>
     </div>
-    <div class="bg-white p-4 rounded-lg shadow mb-4">
-      <canvas id="sales-chart" height="200"></canvas>
+
+    <!-- RINGKASAN METRIK -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white p-4 rounded-lg shadow">
+        <h3 class="text-sm font-medium text-gray-600">Total Transaksi</h3>
+        <p id="summary-transactions" class="text-2xl font-bold text-blue-600">0</p>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow">
+        <h3 class="text-sm font-medium text-gray-600">Total Pendapatan</h3>
+        <p id="summary-revenue" class="text-2xl font-bold text-green-600">Rp 0</p>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow">
+        <h3 class="text-sm font-medium text-gray-600">Rata-rata Transaksi</h3>
+        <p id="summary-average" class="text-2xl font-bold text-purple-600">Rp 0</p>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow">
+        <h3 class="text-sm font-medium text-gray-600">Produk Terlaris</h3>
+        <p id="summary-top-product" class="text-lg font-semibold text-orange-600">-</p>
+      </div>
     </div>
-    <div class="bg-white p-4 rounded-lg shadow">
-      <div id="report-content"></div>
+
+    <!-- CHART -->
+    <div class="bg-white p-5 rounded-lg shadow mb-6">
+      <h3 class="text-lg font-semibold mb-3">Grafik Penjualan</h3>
+      <canvas id="sales-chart" height="100"></canvas>
+    </div>
+
+    <!-- TABEL DETAIL -->
+    <div class="bg-white p-5 rounded-lg shadow">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold">Detail Transaksi</h3>
+        <button onclick="toggleAllDetails()" class="text-sm text-blue-600 hover:underline">Tampilkan/Sembunyikan Semua</button>
+      </div>
+      <div id="report-content" class="overflow-x-auto"></div>
     </div>
   </div>
+
   <div id="toast"></div>
+
   <script src="../assets/js/data.js"></script>
   <script src="../assets/js/utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="js/laporan.js"></script>
 </body>
 </html>
