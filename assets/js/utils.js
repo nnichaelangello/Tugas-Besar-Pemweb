@@ -82,20 +82,25 @@ function showToast(message, type = 'info') {
 
 function formatPriceInput(input) {
   if (!input) return;
-  input.addEventListener('input', () => {
+
+  input.removeEventListener('input', input._formatHandler);
+
+  const handler = () => {
     let value = input.value.replace(/\D/g, '');
-    if (value) {
-      input.value = parseInt(value).toLocaleString('id-ID');
-    } else {
+    if (value === '') {
       input.value = '';
+      return;
     }
-  });
-  input.addEventListener('focus', () => {
-    if (input.value) input.value = input.value.replace(/\D/g, '');
-  });
-  input.addEventListener('blur', () => {
-    if (input.value) input.value = parseInt(input.value).toLocaleString('id-ID');
-  });
+    const num = parseInt(value, 10);
+    if (!isNaN(num)) {
+      input.value = num.toLocaleString('id-ID');
+    }
+  };
+
+  input._formatHandler = handler;
+  input.addEventListener('input', handler);
+
+  input.addEventListener('paste', () => setTimeout(handler, 0));
 }
 
 function debounce(func, wait) {

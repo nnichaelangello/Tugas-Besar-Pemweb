@@ -155,12 +155,19 @@ function loadTopProducts() {
 }
 
 // ==================== LOG AKTIVITAS ====================
+const LOGS_PER_PAGE = 10;
+let currentLogPage = 1;
+let currentLogFilter = 'all';
+let allLogs = []; // Simpan semua log
+
 function loadActivityLog() {
-  const logs = getActivityLog().slice().reverse().slice(0, 50);
-  renderActivityTable(logs);
+  allLogs = getActivityLog().slice().reverse(); // Terbaru di atas
+  currentLogPage = 1;
+  updateLogDisplay();
 }
 
 function showLogTab(filter) {
+  // Update tab aktif
   document.querySelectorAll('.tab-btn').forEach(b => {
     b.classList.remove('bg-blue-100', 'text-blue-700');
     b.classList.add('bg-gray-100', 'text-gray-700');
@@ -168,15 +175,26 @@ function showLogTab(filter) {
   document.getElementById(`tab-${filter}`).classList.remove('bg-gray-100', 'text-gray-700');
   document.getElementById(`tab-${filter}`).classList.add('bg-blue-100', 'text-blue-700');
 
-  const logs = getActivityLog().slice().reverse().slice(0, 50);
-  let filtered = logs;
+  currentLogFilter = filter;
+  currentLogPage = 1;
+  updateLogDisplay();
+}
 
-  if (filter === 'login') filtered = logs.filter(l => /Login|Logout/.test(l.activity));
-  if (filter === 'sales') filtered = logs.filter(l => /Transaksi|retur|Struk/.test(l.activity));
-  if (filter === 'stock') filtered = logs.filter(l => /Stok|ditambahkan|dikurangi/.test(l.activity));
-  if (filter === 'system') filtered = logs.filter(l => /Produk|Pengguna|Pengaturan/.test(l.activity));
+function updateLogDisplay() {
+  let filtered = allLogs;
 
-  renderActivityTable(filtered);
+  if (currentLogFilter === 'login') filtered = allLogs.filter(l => /Login|Logout/.test(l.activity));
+  if (currentLogFilter === 'sales') filtered = allLogs.filter(l => /Transaksi|retur|Struk/.test(l.activity));
+  if (currentLogFilter === 'stock') filtered = allLogs.filter(l => /Stok|ditambahkan|dikurangi/.test(l.activity));
+  if (currentLogFilter === 'system') filtered = allLogs.filter(l => /Produk|Pengguna|Pengaturan/.test(l.activity));
+
+  const total = filtered.length;
+  const start = (currentLogPage - 1) * LOGS_PER_PAGE;
+  const end = Math.min(start + LOGS_PER_PAGE, total);
+  const pageLogs = filtered.slice(start, end);
+
+  renderActivityTable(pageLogs);
+  updatePagination(total, start, end);
 }
 
 function renderActivityTable(logs) {
@@ -195,6 +213,39 @@ function renderActivityTable(logs) {
         `;
       }).join('')
     : '<tr><td colspan="3" class="p-8 text-center text-gray-500">Tidak ada aktivitas</td></tr>';
+}
+
+function updatePagination(total, start, end) {
+  const totalEl = document.getElementById('log-total');
+  const rangeEl = document.getElementById('log-range');
+  const prevBtn = document.getElementById('log-prev');
+  const nextBtn = document.getElementById('log-next');
+
+  totalEl.textContent = total;
+  rangeEl.textContent = total > 0 ? `${start + 1}-${end}` : '0';
+
+  prevBtn.disabled = currentLogPage === 1;
+  nextBtn.disabled = end >= total;
+}
+
+function changeLogPage(delta) {
+  const newPage = currentLogPage + delta;
+  if (newPage < 1) return;
+  const maxPage = Math.ceil(allLogs.filter(l => applyFilter(l, currentLogFilter)).length / LOGS_PER_PAGE);
+  if (newPage > maxPage) return;
+
+  currentLogPage = newPage;
+  updateLogDisplay();
+}
+
+// Helper untuk filter (biar tidak duplikat logika)
+function applyFilter(log, filter) {
+  if (filter === 'all') return true;
+  if (filter === 'login') return /Login|Logout/.test(log.activity);
+  if (filter === 'sales') return /Transaksi|retur|Struk/.test(log.activity);
+  if (filter === 'stock') return /Stok|ditambahkan|dikurangi/.test(log.activity);
+  if (filter === 'system') return /Produk|Pengguna|Pengaturan/.test(log.activity);
+  return true;
 }
 
 // ==================== EKSPOR PDF ====================
